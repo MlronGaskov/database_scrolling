@@ -10,11 +10,11 @@
 
 Количество различных `rowId` во всём материализованном состоянии клиента должно совпадать с количеством хранимых строк:
 
-$$
-\left|\{rowId(r)\mid \exists i:\ r\in Rows_i\}\right|
+```math
+\left| \{ rowId(r) \mid \exists i:\ r \in Rows_i \} \right|
 =
-\sum_i |Rows_i|.
-$$
+\sum_i |Rows_i|
+```
 
 ### 2. Принадлежность диапазону
 
