@@ -1,4 +1,3 @@
-
 # Обзор базовых подходов и критерии сравнения
 
 ## 1. Базовые подходы
@@ -146,12 +145,22 @@ RethinkDB поддерживает live top-N и передачу относит
 
 ## Источники
 
-[1]: https://docs.oasis-open.org/odata/odata/v4.01/os/part1-protocol/odata-v4.01-os-part1-protocol.html "OData 4.01 - Part 1: Protocol, §11.3"
-[2]: https://learn.microsoft.com/en-us/graph/delta-query-overview "Microsoft Graph - Delta query overview"
-[3]: https://spec.graphql.org/September2025/ "GraphQL Specification - September 2025"
-[4]: https://github.com/n1ru4l/graphql-live-query "GraphQL Live Query - реализация и описание"
-[5]: https://firebase.google.com/docs/firestore/query-data/listen "Firestore - Listen to realtime updates"
-[6]: https://rethinkdb.com/docs/changefeeds/ "RethinkDB - Changefeeds"
-[7]: https://rethinkdb.com/api/javascript/changes/ "RethinkDB - ReQL changes API"
-[8]: https://www.rfc-editor.org/rfc/rfc9110.html "RFC 9110 - HTTP Semantics"
-[9]: https://docs.meteor.com/api/meteor "Meteor - Publications and subscriptions"
+1. [OData 4.01 — Part 1: Protocol, §11.3][1]
+2. [Microsoft Graph — Delta query overview][2]
+3. [GraphQL Specification — September 2025][3]
+4. [GraphQL Live Query — реализация и описание][4]
+5. [Firestore — Listen to realtime updates][5]
+6. [RethinkDB — Changefeeds][6]
+7. [RethinkDB — ReQL changes API][7]
+8. [RFC 9110 — HTTP Semantics][8]
+9. [Meteor — Publications and subscriptions][9]
+
+[1]: https://docs.oasis-open.org/odata/odata/v4.01/os/part1-protocol/odata-v4.01-os-part1-protocol.html
+[2]: https://learn.microsoft.com/en-us/graph/delta-query-overview
+[3]: https://spec.graphql.org/September2025/
+[4]: https://github.com/n1ru4l/graphql-live-query
+[5]: https://firebase.google.com/docs/firestore/query-data/listen
+[6]: https://rethinkdb.com/docs/changefeeds/
+[7]: https://rethinkdb.com/api/javascript/changes/
+[8]: https://www.rfc-editor.org/rfc/rfc9110.html
+[9]: https://docs.meteor.com/api/meteor
