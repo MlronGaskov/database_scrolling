@@ -1,3 +1,4 @@
+
 # Обзор базовых подходов и критерии сравнения
 
 ## 1. Базовые подходы
@@ -24,7 +25,7 @@
 |---|---|---|---|---|---|
 | **Full refetch** | Полный результат | Зависит от частоты запросов | История изменений не требуется | Полный результат при каждом чтении | Корректный порядок после повторного чтения |
 | **Periodic range reread** | Только выбранный диапазон | До периода опроса | История изменений не требуется | Весь диапазон при каждом опросе | Корректный порядок после повторного чтения |
-| **Keyset** | Только запрошенный диапазон | Сам по себе не обеспечивает актуализацию | История изменений не требуется | Размер запрошенного диапазона | Стабильные границы по ключу, но изменения требуют повторного чтения |
+| **Keyset** | Только запрошенный диапазон | Сам по себе не обеспечивает актуализацию | История изменений не требуется | Размер запрошенного диапазона | Границы задаются ключом, но состав диапазона может изменяться |
 | **Full-query / collection delta** | Весь отслеживаемый результат | Зависит от частоты получения delta | Требуется отслеживание изменений и возможность продолжения синхронизации | После инициализации передаются изменения отслеживаемого результата | Перестановки требуют обновления клиентского порядка |
 | **Range delta** | Только выбранный диапазон | Зависит от механизма доставки изменений | Требуется определение релевантных диапазону изменений и механизм восстановления | Изменения, влияющие на выбранный диапазон | Учитываются изменения ключей и переходы строк через границы |
 
@@ -38,38 +39,39 @@ Keyset является способом получения данных, а н�
 
 | Решение | Модель данных | Возможности запросов | Разбиение результата | Обнаружение схемы и возможностей |
 |---|---|---|---|---|
-| **Base OData query** | Сущности и связи EDM | `$filter`, `$orderby`, `$select`, `$expand` и другие параметры | `$top`, `$skip`, `nextLink` | `$metadata`, аннотации возможностей [1] |
-| **OData track-changes / delta** | Сущности EDM | Отслеживание результата defining query в пределах возможностей сервера | `nextLink`, затем `deltaLink` | `$metadata`, `Capabilities.ChangeTracking` [1] |
-| **Microsoft Graph Delta Query** | Ресурсы Microsoft Graph | Поддерживаемые параметры зависят от ресурса | `@odata.nextLink` | Метаданные Graph и документация ресурса [2] |
-| **Base GraphQL query** | Типизированный граф объектов | Поля и аргументы определяются схемой | Определяется схемой | GraphQL introspection [3] |
-| **GraphQL Subscription** | Типизированный граф объектов | Подписки на определённые схемой события | Неприменимо к потоку событий | Поля подписки определяются схемой [3] |
-| **GraphQL Live Query** | Типизированный граф объектов | Поддержание результата запроса; зависит от расширения | Зависит от реализации | Зависит от реализации [4] |
-| **Google Cloud Firestore** | Документы и коллекции | Фильтрация, сортировка, ограничения, collection group queries | `limit`, query cursors | Нет обязательной схемы полей [5] |
-| **RethinkDB changefeeds** | JSON-документы | ReQL-запросы с ограничениями для changefeeds | Stream cursor, `order_by.limit` | Таблицы и базы; общей схемы полей нет [6] |
-| **HTTP Conditional GET** | HTTP-представление ресурса | Собственного языка запросов нет | Определяется ресурсом/API | Не определяет схему [8] |
-| **Meteor Livequery** | Документы MongoDB/Minimongo | Серверные публикации и их параметры | Определяется публикацией | Схема зависит от приложения [9] |
+| **Base OData query** | Сущности и связи EDM | `$filter`, `$orderby`, `$select`, `$expand` и другие параметры [1] | `$top`, `$skip`, `nextLink` [1] | `$metadata`, аннотации возможностей [1] |
+| **OData track-changes / delta** | Сущности EDM | Отслеживание результата defining query в пределах возможностей сервера [2] | `nextLink`, затем `deltaLink` [2] | `$metadata`, `Capabilities.ChangeTracking` [2] |
+| **Microsoft Graph Delta Query** | Ресурсы Microsoft Graph | Поддерживаемые параметры зависят от ресурса [3] | `@odata.nextLink` | Метаданные Graph и документация ресурса [3] |
+| **Base GraphQL query** | Типизированный граф объектов | Поля и аргументы определяются схемой | Определяется схемой | GraphQL introspection [4] |
+| **GraphQL Subscription** | Типизированный граф объектов | Подписки на определённые схемой события | Неприменимо к потоку событий | Поля подписки определяются схемой [4] |
+| **GraphQL Live Query** | Типизированный граф объектов | Поддержание результата запроса; зависит от расширения [6] | Зависит от реализации | Зависит от реализации [6] |
+| **Google Cloud Firestore** | Документы и коллекции [7] | Фильтрация, сортировка, ограничения, collection group queries [8] | `limit`, query cursors [9] | Нет обязательной схемы полей [7] |
+| **RethinkDB changefeeds** | JSON-документы | ReQL-запросы с ограничениями для changefeeds [11] | Stream cursor; `order_by.limit` для live top-N [11], [12] | Таблицы и базы; общей схемы полей нет |
+| **HTTP Conditional GET** | HTTP-представление ресурса | Собственного языка запросов нет | Определяется ресурсом/API | Не определяет схему [13] |
+| **Meteor Livequery** | Документы MongoDB/Minimongo [16] | Серверные публикации и их параметры [14] | Определяется публикацией [14] | Схема зависит от приложения [16] |
 | **ISTREAM** | Упорядоченный результат запроса | Фильтрация, проекция, `ORDER BY`, диапазоны ключей | Материализованные диапазоны | Определяется проектируемым протоколом |
 
-GraphQL Subscription входит в спецификацию GraphQL. GraphQL Live Query не является стандартным типом операции GraphQL и реализуется отдельными расширениями. [3], [4]
+GraphQL Subscription входит в спецификацию GraphQL. GraphQL Live Query не является стандартным типом операции GraphQL и реализуется отдельными расширениями. [4], [6]
 
 ### 2.2. Синхронизация изменений и восстановление
 
 | Решение | Контекст | Начальная синхронизация | Изменения и доставка | Fetch → watch | Восстановление после разрыва |
 |---|---|---|---|---|---|
 | **Base OData query** | Результат запроса | Получение результата | Изменения отдельно не передаются | Нет | Повторный запрос [1] |
-| **OData delta** | Результат defining query | Полное прохождение результата до `deltaLink` | Delta polling | `deltaLink` после initial traversal | Продолжение по `deltaLink`; при недоступной истории - повторная синхронизация [1] |
-| **Microsoft Graph Delta Query** | Коллекция ресурса | Страницы до `@odata.deltaLink` | Delta polling | `deltaLink` после initial traversal | Продолжение по токену; при его недействительности - resync [2] |
-| **GraphQL Subscription** | Поток событий | Не определяется стандартом | Результат на каждое событие | Между отдельными query и subscription возможна гонка | Durable replay/resume не определены стандартом [3] |
-| **GraphQL Live Query** | Результат запроса | Первый результат live-операции | Результат или diff, зависит от реализации | Определяется реализацией | Зависит от реализации [4] |
-| **Google Cloud Firestore** | Документ или результат запроса | Начальный `QuerySnapshot` | `added`, `modified`, `removed` через listener | Один listener | Повторная синхронизация через SDK; публичного durable replay с заданной позиции нет [5] |
-| **RethinkDB changefeeds** | Документ, таблица, результат ReQL | `include_initial` | `old_val`, `new_val` через changefeed cursor | Один changefeed | Гарантированного durable replay нет; требуется восстановление состояния [6], [7] |
-| **HTTP Conditional GET** | HTTP-ресурс | Представление и validator | Conditional polling, `304` или новое представление | Нет | Повторная проверка validator [8] |
-| **Meteor Livequery** | Набор документов публикации | Начальные документы до `ready` | `added`, `changed`, `removed` через DDP | Одна подписка | Переподписка и синхронизация состояния; стандартного durable replay нет [9] |
+| **OData delta** | Результат defining query | Полное прохождение результата до `deltaLink` | Delta polling | `deltaLink` после initial traversal | Продолжение по `deltaLink`; при недоступной истории - повторная синхронизация [2] |
+| **Microsoft Graph Delta Query** | Коллекция ресурса | Страницы до `@odata.deltaLink` | Delta polling | `deltaLink` после initial traversal | Продолжение по токену; при его недействительности - resync [3] |
+| **Base GraphQL query** | Результат запроса | Получение результата | Изменения отдельно не передаются | Нет | Повторный запрос [4] |
+| **GraphQL Subscription** | Поток событий | Не определяется стандартом | Результат на каждое событие | Между отдельными query и subscription возможна гонка | Durable replay/resume не определены стандартом [5] |
+| **GraphQL Live Query** | Результат запроса | Первый результат live-операции | Результат или diff, зависит от реализации | Определяется реализацией | Зависит от реализации [6] |
+| **Google Cloud Firestore** | Документ или результат запроса | Начальный `QuerySnapshot` | `added`, `modified`, `removed` через listener | Один listener | Повторная синхронизация через SDK; публичный listener API не предоставляет replay по сохранённой версии [10] |
+| **RethinkDB changefeeds** | Документ, таблица, результат ReQL | `include_initial` | `old_val`, `new_val` через changefeed cursor | Один changefeed | Гарантированного durable replay нет; требуется восстановление состояния [11], [12] |
+| **HTTP Conditional GET** | HTTP-ресурс | Представление и validator | Conditional polling, `304` или новое представление | Нет | Повторная проверка validator [13] |
+| **Meteor Livequery** | Набор документов публикации | Начальные документы до `ready` | `added`, `changed`, `removed` через DDP | Одна подписка | Автоматическая переподписка и синхронизация; durable replay по версии не определён [15], [17] |
 | **ISTREAM** | Материализованный диапазон | Range на версии `v` | Range-scoped view-relative delta | Range fetch → watch после `v` | Replay по версии; при недоступной истории - refetch диапазона |
 
 Для Firestore сравнивается **публичный SDK**. Внутренние детали Watch protocol (`resume_token`, `read_time`, `RESET`) не используются как гарантии публичного API.
 
-Для GraphQL Subscription спецификация не определяет подтверждения доставки, повторную отправку событий и durable resume. Эти свойства должны обеспечиваться конкретной реализацией. [3]
+Для GraphQL Subscription спецификация не определяет подтверждения доставки, повторную отправку событий и durable resume. Эти свойства должны обеспечиваться конкретной реализацией. [5]
 
 ISTREAM в таблице представлен как **проектируемый протокол**, а не как уже подтверждённая реализация.
 
@@ -81,7 +83,7 @@ OData delta отслеживает изменения результата defin
 
 Начальная синхронизация требует прохождения результата defining query. Для коллекции `deltaLink` возвращается на последней странице вместо `nextLink`.
 
-`deltaLink` определяет контекст отслеживания и позицию для последующего получения изменений. При этом стандарт OData 4.01 запрещает включать клиентские значения `$top` и `$skip` в delta link. [1]
+`deltaLink` определяет контекст отслеживания и позицию для последующего получения изменений. При этом стандарт OData 4.01 запрещает включать клиентские значения `$top` и `$skip` в delta link. [2]
 
 **Отличие от ISTREAM:** ISTREAM предполагает начальное получение только выбранного диапазона упорядоченного результата и последующую синхронизацию изменений этого диапазона без обязательного прохождения всего результата defining query.
 
@@ -95,7 +97,7 @@ RethinkDB поддерживает changefeeds для документов, та
 - `include_initial` позволяет получить начальные значения.
 - `include_states` позволяет определить завершение начальной передачи через состояние `ready`.
 - `include_offsets` передаёт `old_offset` и `new_offset`, позволяя поддерживать упорядоченный список на клиенте.
-- `old_val` и `new_val` описывают изменения документов. [6], [7]
+- `old_val` и `new_val` описывают изменения документов. [11], [12]
 
 **Ограничения:**
 
@@ -103,10 +105,10 @@ RethinkDB поддерживает changefeeds для документов, та
 - Сортировка по неиндексированному полю не поддерживается в таком changefeed.
 - `filter` нельзя применять после `order_by.limit` в changefeed.
 - Некоторые преобразования ReQL не поддерживают последующий вызов `changes`.
-- Начальные значения могут перемежаться с изменениями; для разделения фаз предусмотрены `include_states`.
+- Для разграничения начальных значений и последующих изменений предусмотрены `include_states`.
 - `squash` может объединять промежуточные изменения одного документа.
 - Размер очереди changefeed ограничен; при переполнении возможна ошибка.
-- Changefeed не предоставляет гарантированного durable replay с сохранённой клиентом версии. Документация указывает, что доставка не гарантируется из-за отсутствия подтверждений от клиентов. [6], [7]
+- Changefeed не предоставляет гарантированного durable replay с сохранённой клиентом версии. Документация указывает, что доставка не гарантируется из-за отсутствия подтверждений от клиентов. [11], [12]
 
 **Отличие от ISTREAM:**
 
@@ -116,11 +118,21 @@ RethinkDB поддерживает live top-N и передачу относит
 
 ### 3.3. Firestore и GraphQL
 
-**Firestore** предоставляет query listeners, которые сначала возвращают snapshot результата, а затем изменения документов. В первом `QuerySnapshot` существующие документы представлены как `added`. Начальное состояние может поступить из локального кэша, а затем обновиться серверными данными. [5]
+**Firestore** предоставляет query listeners, которые сначала возвращают snapshot результата, а затем изменения документов. В первом `QuerySnapshot` существующие документы представлены как `added`. Начальное состояние может поступить из локального кэша, а затем обновиться серверными данными. [10]
 
-**GraphQL Subscription** описывает подписку на события, а не универсальное автоматическое поддержание результата произвольного запроса. Стандарт не задаёт durable replay. [3]
+**GraphQL Subscription** описывает подписку на события, а не универсальное автоматическое поддержание результата произвольного запроса. Стандарт не задаёт durable replay. [4], [5]
 
-**GraphQL Live Query** может поддерживать актуальный результат запроса и передавать новые результаты или diff, но семантика актуализации и восстановления зависит от реализации. [4]
+**GraphQL Live Query** может поддерживать актуальный результат запроса и передавать новые результаты или diff, но семантика актуализации и восстановления зависит от реализации. [6]
+
+### 3.4. Meteor Livequery
+
+Meteor использует серверные публикации для определения набора документов, синхронизируемого с клиентом.
+
+DDP передаёт сообщения `added`, `changed` и `removed`, а сообщение `ready` подтверждает завершение передачи начальных данных подписки. [14], [15]
+
+При потере соединения клиент Meteor автоматически переподключается, восстанавливает подписки и повторно синхронизирует их состояние. При этом DDP не определяет durable replay всех пропущенных изменений с произвольной сохранённой версии. [15], [17]
+
+**Отличие от ISTREAM:** Meteor синхронизирует опубликованные наборы документов, но не предоставляет описанного механизма независимых версий произвольных диапазонов полного ключа порядка с replay и локальным refetch при недоступной истории.
 
 ## 4. Gap statement
 
@@ -130,6 +142,8 @@ RethinkDB поддерживает live top-N и передачу относит
 - Firestore и Meteor - поддержание результатов запросов или публикаций;
 - RethinkDB - поддержание live top-N с изменениями порядка;
 - keyset - выборку диапазонов по уникальному ключу порядка.
+
+Сравнение основано на документированных возможностях публичных интерфейсов рассмотренных решений. Отсутствие свойства в таблице означает, что соответствующая гарантия не установлена рассмотренной документацией, а не невозможность её реализации дополнительными средствами.
 
 Однако в рассмотренных документированных интерфейсах не выявлено единого механизма, одновременно обеспечивающего:
 
@@ -145,22 +159,38 @@ RethinkDB поддерживает live top-N и передачу относит
 
 ## Источники
 
-1. [OData 4.01 — Part 1: Protocol, §11.3][1]
-2. [Microsoft Graph — Delta query overview][2]
-3. [GraphQL Specification — September 2025][3]
-4. [GraphQL Live Query — реализация и описание][4]
-5. [Firestore — Listen to realtime updates][5]
-6. [RethinkDB — Changefeeds][6]
-7. [RethinkDB — ReQL changes API][7]
-8. [RFC 9110 — HTTP Semantics][8]
-9. [Meteor — Publications and subscriptions][9]
+1. [OData 4.01 - Protocol, §11.2, System Query Options][1] - параметры запросов, сортировка, фильтрация, проекция и разбиение результата.
+2. [OData 4.01 - Protocol, §11.3, Requesting Changes][2] - defining query, `deltaLink`, `nextLink`, отслеживание изменений и повторная синхронизация.
+3. [Microsoft Graph - Delta query overview, Use delta query][3] - начальная синхронизация, `nextLink`, `deltaLink`, replays и synchronization reset.
+4. [GraphQL Specification - Subscription][4] - нормативное определение операций подписки.
+5. [GraphQL Specification - Delivery Agnostic][5] - отсутствие стандартных требований к acknowledgement, buffering и resend.
+6. [GraphQL Live Query - Concept][6] - `@live`, начальный результат, обновления и diff.
+7. [Firestore - Data model, Documents and Collections][7] - документная модель и отсутствие обязательной схемы полей.
+8. [Firestore - Queries, Collection group queries][8] - фильтрация и запросы к группам коллекций.
+9. [Firestore - Query cursors, Paginate a query][9] - `startAt`, `startAfter`, `limit` и курсоры.
+10. [Firestore - Listen, View changes between snapshots][10] - `QuerySnapshot`, `added`, `modified`, `removed` и начальное состояние listener.
+11. [RethinkDB - Changefeeds][11] - `order_by.limit`, ограничения changefeeds, `include_initial`, доставка и её гарантии.
+12. [RethinkDB - ReQL changes API][12] - `include_offsets`, `include_states`, `squash`, `old_val` и `new_val`.
+13. [RFC 9110 - Conditional Requests, §13.1.2][13] - условные запросы с `If-None-Match` и ответ `304 Not Modified`.
+14. [Meteor - Publications and subscriptions][14] - серверные публикации, их параметры и наборы документов.
+15. [Meteor - DDP Specification][15] - сообщения `added`, `changed`, `removed`, `ready` и семантика подписок.
+16. [Meteor - Collections][16] - MongoDB, Minimongo и клиентское хранилище документов.
+17. [Meteor - DDP package, Transparent reconnection][17] - автоматическое переподключение, восстановление подписок и повторная синхронизация.
 
-[1]: https://docs.oasis-open.org/odata/odata/v4.01/os/part1-protocol/odata-v4.01-os-part1-protocol.html
-[2]: https://learn.microsoft.com/en-us/graph/delta-query-overview
-[3]: https://spec.graphql.org/September2025/
-[4]: https://github.com/n1ru4l/graphql-live-query
-[5]: https://firebase.google.com/docs/firestore/query-data/listen
-[6]: https://rethinkdb.com/docs/changefeeds/
-[7]: https://rethinkdb.com/api/javascript/changes/
-[8]: https://www.rfc-editor.org/rfc/rfc9110.html
-[9]: https://docs.meteor.com/api/meteor
+[1]: https://docs.oasis-open.org/odata/odata/v4.01/os/part1-protocol/odata-v4.01-os-part1-protocol.html#:~:text=11.2%20System%20Query%20Options
+[2]: https://docs.oasis-open.org/odata/odata/v4.01/os/part1-protocol/odata-v4.01-os-part1-protocol.html#:~:text=11.3%20Requesting%20Changes
+[3]: https://learn.microsoft.com/en-us/graph/delta-query-overview#use-delta-query-to-track-changes-in-a-resource-collection
+[4]: https://spec.graphql.org/September2025/#sec-Subscription
+[5]: https://spec.graphql.org/September2025/#sec-Delivery-Agnostic
+[6]: https://github.com/n1ru4l/graphql-live-query#concept
+[7]: https://firebase.google.com/docs/firestore/data-model#documents
+[8]: https://firebase.google.com/docs/firestore/query-data/queries#collection-group-queries
+[9]: https://firebase.google.com/docs/firestore/query-data/query-cursors#paginate_a_query
+[10]: https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots
+[11]: https://rethinkdb.com/docs/changefeeds#:~:text=order_by%20requires%20limit
+[12]: https://rethinkdb.com/api/javascript/changes#:~:text=includeOffsets
+[13]: https://www.rfc-editor.org/rfc/rfc9110.html#section-13.1.2
+[14]: https://docs.meteor.com/api/meteor#:~:text=Publish%20a%20record%20set
+[15]: https://github.com/meteor/meteor/blob/devel/packages/ddp/DDP.md#:~:text=The%20client%20specifies%20sets%20of%20information
+[16]: https://docs.meteor.com/api/collections#:~:text=On%20the%20client
+[17]: https://github.com/meteor/meteor/blob/devel/packages/ddp/README.md#:~:text=Transparent%20reconnection
